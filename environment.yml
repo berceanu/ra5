@@ -162,7 +162,7 @@ dependencies:
   - jupyterlab-launcher==0.10.3
   - mpi4py==3.0.0
   - prompt-toolkit==1.0.15
-  - sdf==1.0
+  - sdf
   - tables==3.4.2
 prefix: /home/berceanu/miniconda3/envs/scipy
 
