@@ -1,4 +1,4 @@
-''' Module containing useful plotting abstractions on top of matplotlib. '''
+""" Module containing useful plotting abstractions on top of matplotlib. """
 
 import numpy as np
 
