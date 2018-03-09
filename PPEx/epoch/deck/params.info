@@ -1,0 +1,161 @@
+Name of species 1 is ele
+Name of species 2 is N_ele
+Name of species 3 is N
+Name of species 4 is N1
+Name of species 5 is N2
+
+
+Attempting to restart from file: /home/berceanu/Development/PPEx/0016.sdf
+Loading snapshot for time   8.6871809936126784E-012
+
+
+begin:constant
+  cells_x = 1024
+  cells_y = 96
+  cells_z = 96
+  ppc_x = 2
+  ppc_y = 2
+  ppc_z = 1
+  ppc =   4
+  
+  plasma_skin_depth =  0.26575000000E-05
+  plasma_time_unit =  0.88644658299E-14
+  plasma_omega =  0.11280995597E+15
+  density_unit =  0.39986353164E+25
+  
+  laser_a0 = 19
+  laser_wavelength =  0.80000000000E-06
+  laser_omega =  0.23545644591E+16
+  laser_waist =  0.90000000000E-05
+  laser_duration =  0.40000000000E-13
+
+  box_length_x =  0.50000000000E-04
+  box_half_length_y =  0.40000000000E-03
+  
+  url =  0.10000000000E-03
+  ftl =  0.24500000000E-02
+
+  laser_distance_to_focus = -0.23170000000E-02
+  Z_R =  0.31808625618E-03
+  laser_W =  0.66172582281E-04
+  laser_a =   2.5841518361    
+  laser_radius_curvature = -0.23606680476E-02
+  pi_div_laser_radius_curvature_div_lambda =  -1663508268.7    
+  Gouy_phase =  -1.4343654895    
+  time_end =  0.90417551465E-11
+end:constant
+
+
+begin:control
+  print_constants = T
+  # number of previously written restart dump to start from
+  restart_snapshot = 16
+
+  nx =      1024
+  ny =        96
+  nz =        96
+
+  # final simulation time in seconds
+  t_end =  0.90417551465E-11
+
+  x_min = -0.10000000000E-03
+  x_max = -0.50000000000E-04
+  y_min = -0.40000000000E-03
+  y_max =  0.40000000000E-03
+  z_min = -0.40000000000E-03
+  z_max =  0.40000000000E-03
+
+  # multiplying factor applied to CFL condition on timestep
+  dt_multiplier =  0.99999900000 
+  # min/max load ratio before the code load balances
+  dlb_threshold = 0.4
+  
+  # print message to screen every .. steps
+  stdout_frequency = 1024
+  field_ionisation = T
+end:control
+
+
+begin:boundaries
+  bc_x_min = simple_laser
+  bc_x_max = open
+  bc_y_min = open
+  bc_y_max = open
+  bc_z_min = open
+  bc_z_max = open
+end:boundaries
+
+
+begin:species
+  name = ele
+  charge = -1.0
+  mass = 1.0
+  npart_per_cell =   4.0000000000    
+  density_min =  0.39986353164E+22
+  density = if((x lt -1.*url) or (x gt ftl+url), 0., 1.)
+  density = if((x gt -1.*url) and (x lt 0.), (1+cos(x * pi / url))/2., density(ele))
+  density = if((x gt ftl) and (x lt ftl+url), (1+cos((x-ftl) * pi / url))/2., density(ele))
+  density = if((abs(y) gt 0.99 * box_half_length_y) or (abs(z) gt 0.99 * box_half_length_y), 0., density(ele))
+  density = density_unit * density(ele)
+end:species
+
+begin:species
+  charge = -1.0
+  mass = 1.0
+  name = N_ele
+  npart_per_cell =   4.0000000000    
+  density_min =  0.39986353164E+22
+end:species
+
+begin:species
+  charge = 5.0
+  mass =   12860.400000    
+  name = N
+  immobile = T
+  ionisation_energies = (552.0718 * ev, 667.046 * ev)
+  ionisation_electron_species = (N_ele, N_ele)
+  npart_per_cell =   4.0000000000    
+  density_min =  0.39986353164E+22
+  rho = density(ele) / 5.0
+end:species
+
+begin:laser
+  boundary =         1
+  omega = laser_omega
+  amp =  0.10371173826E+14
+  phase = (y^2+z^2) * pi_div_laser_radius_curvature_div_lambda - Gouy_phase
+  pol = 0.
+  profile = gauss(y, 0., laser_W) * gauss(z, 0., laser_W) * gauss(time, laser_duration * 2., laser_duration)
+  t_start = 0.0
+  t_end =  0.24000000000E-12
+end:laser
+
+
+begin:window
+  move_window = T
+  # speed in m/s of the window
+  window_v_x =   299192873.08    
+  # time in seconds at which the window should start moving
+  window_start_time =  0.16678204760E-12
+  bc_x_min_after_move = simple_outflow
+  bc_x_max_after_move = simple_outflow
+end:window
+
+
+begin:output
+  # when to start considering output
+  time_start = 0.
+  # number of timesteps between output dumps
+  dt_snapshot =  0.56732581311E-12
+  force_last_to_be_restartable = T
+  restart_dump_every = 1
+
+  particles = always
+  px = always
+  py = always
+  pz = always
+  particle_weight = always
+  ex = always
+  ey = always
+  number_density = always + species + no_sum
+end:output

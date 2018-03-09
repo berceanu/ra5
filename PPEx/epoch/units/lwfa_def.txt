@@ -1,0 +1,13 @@
+# Density
+[density] = 1 / [volume]
+
+@context lwfa
+    [length] -> [time]: value / speed_of_light
+    [time] -> [length]: speed_of_light * value
+    [length] <-> [frequency]: speed_of_light / value
+    [length] -> [density]: (speed_of_light / value)**2 * m_e * epsilon_0 / e**2
+    [frequency] -> [energy]: planck_constant * value
+    [energy] -> [frequency]: value / planck_constant
+    # allow wavenumber / kayser
+    1 / [length] <-> [length]: 1 / value
+@end

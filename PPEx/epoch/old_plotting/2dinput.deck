@@ -1,0 +1,101 @@
+begin:constant
+  cells_x = 4096
+  cells_y = 256
+  ppc_x = 4
+  ppc_y = 4
+  ppc = ppc_x * ppc_y
+  plasma_skin_depth = 8. * micron
+  plasma_time_unit = plasma_skin_depth / c
+  plasma_omega = c / plasma_skin_depth
+  density_unit = critical(plasma_omega)
+# laser power in GW
+  Power_in_GW = 1.e3
+  laser_wavelength = 0.8 * micron
+  laser_omega = 2. * pi * c / laser_wavelength
+# waist at focus
+  laser_waist = 20. * micron
+# laser amplitude at focus
+  laser_a0 = sqrt(Power_in_GW / 21.5) * laser_wavelength / laser_waist
+  laser_duration = 40. * femto
+  box_length_x = 200. * micron
+  box_half_length_y = 5 * laser_waist
+# plasma up ramp length
+  url = 100. * micron
+  time_end = 1000. * micron / c
+end:constant
+
+begin:control
+#  restart_snapshot = 12
+  nx = cells_x
+  ny = cells_y
+  t_end = time_end
+
+  # size of domain
+  x_min = -1. * url
+  x_max = box_length_x + x_min
+  y_min = -1. * box_half_length_y
+  y_max = box_half_length_y
+
+  dt_multiplier = 1.0-1.0e-6
+  stdout_frequency = 1024
+end:control
+
+  begin:boundaries
+  bc_x_min = simple_laser
+  bc_x_max = open
+  bc_y_min = open
+  bc_y_max = open
+end:boundaries
+
+begin:species
+  name = ele
+  charge = -1.0
+  mass = 1.0
+  npart_per_cell = ppc
+  density_min = 1.e-3 * density_unit
+  density = if(x lt -1.*url, 0., 1.)
+  density = if((x gt -1.*url) and (x lt 0.), x/url+1, density(ele))
+  density = if(abs(y) gt 0.99 * box_half_length_y, 0., density(ele))
+  density = density_unit * density(ele)
+end:species
+
+begin:laser
+  boundary = x_min
+  omega = laser_omega
+  amp = laser_a0 * laser_omega * 0.00170450901
+#0.00170450901 = me * c / qe
+  phase = 0.
+  pol = 0.
+  profile = gauss(y, 0., laser_waist) * gauss(time, laser_duration * 2., laser_duration)
+  t_start = 0.0
+  t_end = 6. * laser_duration
+end:laser
+
+begin:window
+  move_window = T
+  window_v_x = c
+  window_start_time = box_length_x / c
+  bc_x_min_after_move = simple_outflow
+  bc_x_max_after_move = simple_outflow
+end:window
+
+begin:output
+  time_start = 0.
+  # number of timesteps between output dumps
+  dt_snapshot = time_end / 16.
+  force_last_to_be_restartable = T
+  restart_dump_every = 1
+
+  particles = always
+  px = always
+  py = always
+  pz = always
+  particle_weight = always
+# Properties on grid
+  ex = always
+  ey = always
+#  ez = always
+#  bz = always
+  number_density = always + species + no_sum
+end:output
+
