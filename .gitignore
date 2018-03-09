@@ -1,3 +1,9 @@
+# EPOCH output files
+*.sdf
+
+# Portable document format
+*.pdf
+ 
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
