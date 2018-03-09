@@ -42,7 +42,7 @@ class Plot2D:
 
     def cbar(self, ax=None, **kwargs):
         r"""
-        >>> p2d.cbar(figsize=(4.8, 4.8))
+        >>> p2d.cbar(figsize=(4.8, 4.8), cmap='hot')
         """
         if not ax:
             self.param.update(kwargs)
