@@ -79,7 +79,7 @@ class Plot2D:
             vslice_pos = self.data.shape[1] // 2 
         if not vslice_opts:
             vslice_opts = slice_opts
-    
+
         # A lot of information about GridSpec can be found here:
         # https://matplotlib.org/tutorials/intermediate/gridspec.html
         
@@ -114,7 +114,7 @@ class Plot2D:
         # Horizontal Slice Profile
         axh.set_xmargin(0)  # otherwise ax0 may have white margins
         axh.set_ylabel(self.label['z'])
-        axh.plot(self.h_axis, self.data[hslice_pos], **hslice_opts)
+        axh.plot(self.h_axis, self.data[hslice_pos, :], **hslice_opts)
         #axh.set_ylim(-1, 1)
         #axh.set_yticks([-1, 0, 1])
         # NB: More examples of fancy customisation of ticks and formatters here:
@@ -124,7 +124,7 @@ class Plot2D:
         # Vertical Slice Profile
         axv.set_ymargin(0)  # otherwise ax0 may have white margins
         axv.set_xlabel(self.label['z'])
-        axv.plot(self.data[vslice_pos], self.v_axis, **vslice_opts)
+        axv.plot(self.data[:, vslice_pos], self.v_axis, **vslice_opts)
         #axv.set_xlim(-1, 1)
         #axv.set_xticks([-1, 0, 1])
         
