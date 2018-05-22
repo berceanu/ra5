@@ -1,0 +1,17 @@
+ EPOCH3D v4.7.4   v4.7.4-0-ga5cf59a-clean 1457481722.626               
+
+ Loaded 16302080 particles of species "ele"
+ Loaded 0 particles of species "N_ele"
+ Loaded 15695872 particles of species "N"
+Wrote restart dump number    0 at time  0.569782671990E-16 and iteration      0
+Wrote normal  dump number    1 at time  0.426995134389E-12 and iteration   3747
+Wrote normal  dump number    2 at time  0.853990268779E-12 and iteration   7494
+Wrote normal  dump number    3 at time  0.128098540317E-11 and iteration  11241
+Wrote normal  dump number    4 at time  0.170786658102E-11 and iteration  14987
+Wrote restart dump number    5 at time  0.213486171541E-11 and iteration  18734
+Wrote normal  dump number    6 at time  0.256185684980E-11 and iteration  22481
+Wrote normal  dump number    7 at time  0.298873802765E-11 and iteration  26227
+Wrote normal  dump number    8 at time  0.341573316204E-11 and iteration  29974
+Wrote normal  dump number    9 at time  0.384272829643E-11 and iteration  33721
+Wrote restart dump number   10 at time  0.426972343082E-11 and iteration  37468
+Wrote normal  dump number   11 at time  0.469660460868E-11 and iteration  41214

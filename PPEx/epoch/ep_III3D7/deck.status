@@ -1,0 +1,278 @@
+ EPOCH3D v4.7.4   v4.7.4-0-ga5cf59a-clean 1457481722.626               
+
+Deck state:  1
+
+ Beginning "constant" block
+
+ 	Element cells_x=1024 handled OK
+ 	Element cells_y=64 handled OK
+ 	Element cells_z=64 handled OK
+ 	Element ppc_x=2 handled OK
+ 	Element ppc_y=2 handled OK
+ 	Element ppc_z=1 handled OK
+ 	Element ppc=ppc_x * ppc_y * ppc_z handled OK
+ 	Element plasma_skin_depth=2. * micron handled OK
+ 	Element plasma_time_unit=plasma_skin_depth / c handled OK
+ 	Element plasma_omega=c / plasma_skin_depth handled OK
+ 	Element density_unit=critical(plasma_omega) handled OK
+ 	Element laser_a0=3. handled OK
+ 	Element laser_wavelength=0.8 * micron handled OK
+ 	Element laser_omega=2. * pi * c / laser_wavelength handled OK
+ 	Element laser_waist=20. * micron handled OK
+ 	Element laser_duration=20. * femto handled OK
+ 	Element box_length_x=35. * micron handled OK
+ 	Element box_half_length_y=50. * micron handled OK
+ 	Element url=50. * micron handled OK
+ 	Element ftl=1000. * micron handled OK
+ 	Element time_end=1280. * plasma_time_unit handled OK
+
+ Ending "constant" block
+
+ Beginning "control" block
+
+ 	Element nx=cells_x handled OK
+ 	Element ny=cells_y handled OK
+ 	Element nz=cells_z handled OK
+ 	Element t_end=time_end handled OK
+ 	Element x_min=-1. * url handled OK
+ 	Element x_max=box_length_x + x_min handled OK
+ 	Element y_min=-1. * box_half_length_y handled OK
+ 	Element y_max=box_half_length_y handled OK
+ 	Element z_min=y_min handled OK
+ 	Element z_max=y_max handled OK
+ 	Element dt_multiplier=1.0-1.0e-6 handled OK
+ 	Element dlb_threshold=0.4 handled OK
+ 	Element stdout_frequency=1024 handled OK
+ 	Element field_ionisation=T handled OK
+
+ Ending "control" block
+
+ Beginning "boundaries" block
+
+ 	Element bc_x_min=simple_laser handled OK
+ 	Element bc_x_max=open handled OK
+ 	Element bc_y_min=open handled OK
+ 	Element bc_y_max=open handled OK
+ 	Element bc_z_min=open handled OK
+ 	Element bc_z_max=open handled OK
+
+ Ending "boundaries" block
+
+ Beginning "species" block
+
+ 	Element name=ele handled OK
+ 	Element charge=-1.0 handled OK
+ 	Element mass=1.0 handled OK
+ 	Element npart_per_cell=ppc handled OK
+ 	Element density_min=1.e-3 * density_unit handled OK
+ 	Element density=if((x lt -1.*url) or (x gt ftl+url), 0., 1.) handled OK
+ 	Element density=if((x gt -1.*url) and (x lt 0.), (1+cos(x * pi / url))/2., density(ele)) handled OK
+ 	Element density=if((x gt ftl) and (x lt ftl+url), (1+cos((x-ftl) * pi / url))/2., density(ele)) handled OK
+ 	Element density=if((abs(y) gt 0.99 * box_half_length_y) or (abs(z) gt 0.99 * box_half_length_y), 0., density(ele)) handled OK
+ 	Element density=density_unit * density(ele) handled OK
+
+ Ending "species" block
+
+ Beginning "species" block
+
+ 	Element charge=-1.0 handled OK
+ 	Element mass=1.0 handled OK
+ 	Element name=N_ele handled OK
+ 	Element npart_per_cell=ppc handled OK
+ 	Element density_min=1.e-3 * density_unit handled OK
+
+ Ending "species" block
+
+ Beginning "species" block
+
+ 	Element charge=5.0 handled OK
+ 	Element mass=1837.2 * 7. handled OK
+ 	Element name=N handled OK
+ 	Element immobile=T handled OK
+ 	Element ionisation_energies=(552.0718 * ev, 667.046 * ev) handled OK
+ 	Element ionisation_electron_species=(N_ele, N_ele) handled OK
+ 	Element npart_per_cell=ppc handled OK
+ 	Element density_min=1.e-3 * density_unit handled OK
+ 	Element rho=density(ele) / 5.0 handled OK
+ 	Element dumpmask=never handled OK
+
+ Ending "species" block
+
+ Beginning "laser" block
+
+ 	Element boundary=x_min handled OK
+ 	Element omega=laser_omega handled OK
+ 	Element amp=laser_a0 * laser_omega * 0.00170450901 handled OK
+ 	Element phase=0. handled OK
+ 	Element pol=0. handled OK
+ 	Element profile=gauss(y, 0., laser_waist) * gauss(z, 0., laser_waist) * gauss(time, laser_duration * 2.2, laser_duration) handled OK
+ 	Element t_start=0.0 handled OK
+ 	Element t_end=6. * laser_duration handled OK
+
+ Ending "laser" block
+
+ Beginning "window" block
+
+ 	Element move_window=T handled OK
+ 	Element window_v_x=c * 0.996 handled OK
+ 	Element window_start_time=box_length_x / c handled OK
+ 	Element bc_x_min_after_move=simple_outflow handled OK
+ 	Element bc_x_max_after_move=simple_outflow handled OK
+
+ Ending "window" block
+
+ Beginning "output" block
+
+ 	Element time_start=0. handled OK
+ 	Element dt_snapshot=64. * plasma_time_unit handled OK
+ 	Element force_last_to_be_restartable=T handled OK
+ 	Element restart_dump_every=5 handled OK
+ 	Element particles=always handled OK
+ 	Element px=always handled OK
+ 	Element py=always handled OK
+ 	Element pz=always handled OK
+ 	Element particle_weight=always handled OK
+ 	Element ex=always handled OK
+ 	Element number_density=always + species + no_sum handled OK
+
+ Ending "output" block
+
+Deck state:  2
+
+ Beginning "constant" block
+
+ 	Element cells_x=1024 handled OK
+ 	Element cells_y=64 handled OK
+ 	Element cells_z=64 handled OK
+ 	Element ppc_x=2 handled OK
+ 	Element ppc_y=2 handled OK
+ 	Element ppc_z=1 handled OK
+ 	Element ppc=ppc_x * ppc_y * ppc_z handled OK
+ 	Element plasma_skin_depth=2. * micron handled OK
+ 	Element plasma_time_unit=plasma_skin_depth / c handled OK
+ 	Element plasma_omega=c / plasma_skin_depth handled OK
+ 	Element density_unit=critical(plasma_omega) handled OK
+ 	Element laser_a0=3. handled OK
+ 	Element laser_wavelength=0.8 * micron handled OK
+ 	Element laser_omega=2. * pi * c / laser_wavelength handled OK
+ 	Element laser_waist=20. * micron handled OK
+ 	Element laser_duration=20. * femto handled OK
+ 	Element box_length_x=35. * micron handled OK
+ 	Element box_half_length_y=50. * micron handled OK
+ 	Element url=50. * micron handled OK
+ 	Element ftl=1000. * micron handled OK
+ 	Element time_end=1280. * plasma_time_unit handled OK
+
+ Ending "constant" block
+
+ Beginning "control" block
+
+ 	Element nx=cells_x handled OK
+ 	Element ny=cells_y handled OK
+ 	Element nz=cells_z handled OK
+ 	Element t_end=time_end handled OK
+ 	Element x_min=-1. * url handled OK
+ 	Element x_max=box_length_x + x_min handled OK
+ 	Element y_min=-1. * box_half_length_y handled OK
+ 	Element y_max=box_half_length_y handled OK
+ 	Element z_min=y_min handled OK
+ 	Element z_max=y_max handled OK
+ 	Element dt_multiplier=1.0-1.0e-6 handled OK
+ 	Element dlb_threshold=0.4 handled OK
+ 	Element stdout_frequency=1024 handled OK
+ 	Element field_ionisation=T handled OK
+
+ Ending "control" block
+
+ Beginning "boundaries" block
+
+ 	Element bc_x_min=simple_laser handled OK
+ 	Element bc_x_max=open handled OK
+ 	Element bc_y_min=open handled OK
+ 	Element bc_y_max=open handled OK
+ 	Element bc_z_min=open handled OK
+ 	Element bc_z_max=open handled OK
+
+ Ending "boundaries" block
+
+ Beginning "species" block
+
+ 	Element name=ele handled OK
+ 	Element charge=-1.0 handled OK
+ 	Element mass=1.0 handled OK
+ 	Element npart_per_cell=ppc handled OK
+ 	Element density_min=1.e-3 * density_unit handled OK
+ 	Element density=if((x lt -1.*url) or (x gt ftl+url), 0., 1.) handled OK
+ 	Element density=if((x gt -1.*url) and (x lt 0.), (1+cos(x * pi / url))/2., density(ele)) handled OK
+ 	Element density=if((x gt ftl) and (x lt ftl+url), (1+cos((x-ftl) * pi / url))/2., density(ele)) handled OK
+ 	Element density=if((abs(y) gt 0.99 * box_half_length_y) or (abs(z) gt 0.99 * box_half_length_y), 0., density(ele)) handled OK
+ 	Element density=density_unit * density(ele) handled OK
+
+ Ending "species" block
+
+ Beginning "species" block
+
+ 	Element charge=-1.0 handled OK
+ 	Element mass=1.0 handled OK
+ 	Element name=N_ele handled OK
+ 	Element npart_per_cell=ppc handled OK
+ 	Element density_min=1.e-3 * density_unit handled OK
+
+ Ending "species" block
+
+ Beginning "species" block
+
+ 	Element charge=5.0 handled OK
+ 	Element mass=1837.2 * 7. handled OK
+ 	Element name=N handled OK
+ 	Element immobile=T handled OK
+ 	Element ionisation_energies=(552.0718 * ev, 667.046 * ev) handled OK
+ 	Element ionisation_electron_species=(N_ele, N_ele) handled OK
+ 	Element npart_per_cell=ppc handled OK
+ 	Element density_min=1.e-3 * density_unit handled OK
+ 	Element rho=density(ele) / 5.0 handled OK
+ 	Element dumpmask=never handled OK
+
+ Ending "species" block
+
+ Beginning "laser" block
+
+ 	Element boundary=x_min handled OK
+ 	Element omega=laser_omega handled OK
+ 	Element amp=laser_a0 * laser_omega * 0.00170450901 handled OK
+ 	Element phase=0. handled OK
+ 	Element pol=0. handled OK
+ 	Element profile=gauss(y, 0., laser_waist) * gauss(z, 0., laser_waist) * gauss(time, laser_duration * 2.2, laser_duration) handled OK
+ 	Element t_start=0.0 handled OK
+ 	Element t_end=6. * laser_duration handled OK
+
+ Ending "laser" block
+
+ Beginning "window" block
+
+ 	Element move_window=T handled OK
+ 	Element window_v_x=c * 0.996 handled OK
+ 	Element window_start_time=box_length_x / c handled OK
+ 	Element bc_x_min_after_move=simple_outflow handled OK
+ 	Element bc_x_max_after_move=simple_outflow handled OK
+
+ Ending "window" block
+
+ Beginning "output" block
+
+ 	Element time_start=0. handled OK
+ 	Element dt_snapshot=64. * plasma_time_unit handled OK
+ 	Element force_last_to_be_restartable=T handled OK
+ 	Element restart_dump_every=5 handled OK
+ 	Element particles=always handled OK
+ 	Element px=always handled OK
+ 	Element py=always handled OK
+ 	Element pz=always handled OK
+ 	Element particle_weight=always handled OK
+ 	Element ex=always handled OK
+ 	Element number_density=always + species + no_sum handled OK
+
+ Ending "output" block
+
+ Initial conditions complete and valid. Attempting to load particles
+
