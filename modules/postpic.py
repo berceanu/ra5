@@ -47,8 +47,8 @@ def get_a0(ts, t=None, iteration=None, pol='x', m='all', lambda0=0.8e-6):
     fwhm_a0_w0 = np.sum(np.greater_equal(envelope[:, z_idx], a0_max/2)) * info_Ex.dr
     # FWHM longitudinal size of the beam, proportional to ctau
     fwhm_a0_ctau = np.sum(np.greater_equal(envelope_z, a0_max/2)) * info_Ex.dz
-        
-    return z0, a0, fwhm_a0_w0, fwhm_a0_ctau
+
+    return z0, a0_max, fwhm_a0_w0, fwhm_a0_ctau
 
 
 
