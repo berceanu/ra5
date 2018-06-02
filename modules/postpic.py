@@ -29,22 +29,26 @@ def get_a0(ts, t=None, iteration=None, pol='x', m='all', lambda0=0.8e-6):
     Ex, info_Ex = ts.get_field(field='E', coord=pol,
                                t=t, iteration=iteration,
                                m=m, theta=theta, slicing_dir=slicing_dir)
-    
-    envelope = np.abs(hilbert(Ex, axis=1))
+    #normalization
+    a0 = Ex/E0(lambda0)
+
+    # get pulse envelope
+    envelope = np.abs(hilbert(a0, axis=1))
     envelope_z = envelope[envelope.shape[0]//2, :]
     
-    a0 = np.amax(envelope_z)/E0(lambda0)    
-    #a0 =np.amax(Ex)        /E0(lambda0)
+    a0_max = np.amax(envelope_z)    
         
-    # index of r=0
-    idx_r_0 = Ex.shape[0]//2
     # index of peak
-    i_max = np.argmax(Ex[idx_r_0, :])
+    z_idx = np.argmax(envelope_z)
     # peak position
-    #z0 = info_Ex.z[i_max]
-    z0 = info_Ex.z[np.argmax(envelope_z)]
+    z0 = info_Ex.z[z_idx]
 
-    return z0, a0
+    # FWHM perpendicular size of beam, proportional to w0
+    fwhm_a0_w0 = np.sum(np.greater_equal(envelope[:, z_idx], a0_max/2)) * info_Ex.dr
+    # FWHM longitudinal size of the beam, proportional to ctau
+    fwhm_a0_ctau = np.sum(np.greater_equal(envelope_z, a0_max/2)) * info_Ex.dz
+        
+    return z0, a0, fwhm_a0_w0, fwhm_a0_ctau
 
 
 
@@ -101,12 +105,12 @@ def get_laser_diags(ts, t=None, iteration=None, pol='x', m='all',
     if pol not in ['x', 'y']:
         raise ValueError('The `pol` argument is missing or erroneous.')
 
-    if pol == 'x':
-        slicing_dir = 'y'
-        theta = 0
-    else:
-        slicing_dir = 'x'
-        theta = np.pi / 2.
+    # if pol == 'x':
+    #     slicing_dir = 'y'
+    #     theta = 0
+    # else:
+    #     slicing_dir = 'x'
+    #     theta = np.pi / 2.
         
     # get pulse envelope
     #E_vs_z, info = ts.get_laser_envelope(t=t, iteration=iteration,
@@ -116,13 +120,15 @@ def get_laser_diags(ts, t=None, iteration=None, pol='x', m='all',
     #i_max = np.argmax( E_vs_z )
     #z0 = info.z[i_max]
     
-    z0, a0 = get_a0(ts, t=t, iteration=iteration, pol=pol, m=m, lambda0=lambda0)
+    z0, a0, w0, ctau = get_a0(ts, t=t, iteration=iteration,
+                                              pol=pol, m=m, lambda0=lambda0)
 
-    omega0 = ts.get_main_frequency(t=t, iteration=iteration, pol=pol)
+    #omega0 = ts.get_main_frequency(t=t, iteration=iteration, pol=pol)
+    omega0 = 0.
     #a0 = ts.get_a0(t=t, iteration=iteration, pol=pol)
-    w0 = ts.get_laser_waist(t=t, iteration=iteration, pol=pol, theta=theta,
-                         slicing_dir=slicing_dir, method=method)
-    ctau = ts.get_ctau(t=t, iteration=iteration, pol=pol, method=method)
+    #w0 = ts.get_laser_waist(t=t, iteration=iteration, pol=pol, theta=theta,
+    #                     slicing_dir=slicing_dir, method=method)
+    #ctau = ts.get_ctau(t=t, iteration=iteration, pol=pol, method=method)
 
     # assign units
     z0_u, omega0_u, w0_u, ctau_u = 'm', 'rad/s', 'm', 'm'
