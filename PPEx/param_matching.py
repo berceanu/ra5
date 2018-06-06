@@ -42,6 +42,10 @@ class Laser(object):
         self.a_0 = 8.6 * self.lambda_0 * sqrt(self.I_0)
         # amplitude of the electric field in TV/m
         self.E = 3.21 * self.a_0 / self.lambda_0
+        # laser transverse size (?)
+        self.r_0 = 1 / self.k_0 * self.a_0 / sqrt(sqrt(1 + self.a_0**2))
+        # recommended longitudinal resolution, along propagation direction
+        self.dz = 0.2 / self.k_0
 
 
     def power(self):
@@ -68,6 +72,7 @@ class Plasma(object):
         self.lambda_p = 33.39 / sqrt(self.n_p) # skin depth in microns
         self.k_p = 2 * pi / self.lambda_p # wavenumber in rad/micron
         self.omega_p = 5.64 * 1e-2 * sqrt(self.n_p) # electron plasma frequency in rad/fs
+        self.dr = 0.116 / self.k_p
 
 
 class Matching(object):
@@ -93,17 +98,19 @@ class Matching(object):
         self.P_c = 0.017 * omega_ratio
 
     def conditions(self):
-        message = "Current plasma density is n_p = {:06.2f} 10^18 cm^(-3).\n".format(self.plasma.n_p)
+        message = "Current plasma density is n_p = {:.3f} 10^18 cm^(-3).\n".format(self.plasma.n_p)
         waist = sqrt(self.laser.a_0) * self.plasma.lambda_p / pi
-        message += "The recommended beam waist at this density is {:06.2f} micron.\n".format(waist)
-        message += "The recommended a_0 = {:06.2f}.\n".format(2* (self.laser.P / self.P_c)**(1/3))
+        message += "The recommended beam waist at this density is {:.3f} micron.\n".format(waist)
+        message += "The recommended a_0 = {:.3f}.\n".format(2* (self.laser.P / self.P_c)**(1/3))
         if self.laser.a_0 >= 4:
             nlim = self.n_c / self.laser.a_0**5
-            message += "Etching rate should exceed diffraction rate: n_p >= {:06.2f} 10^18 cm^(-3).\n".format(nlim)
+            message += "Etching rate should exceed diffraction rate: n_p >= {:.3f} 10^18 cm^(-3).\n".format(nlim)
         nlim = 30 / self.laser.P
-        message += "For good self-guiding, P >= P_c, therefore n_p >= {:06.2f} 10^18 cm^(-3).\n".format(nlim)
+        message += "For good self-guiding, P >= P_c, therefore n_p >= {:.3f} 10^18 cm^(-3).\n".format(nlim)
         nlim = 112.96 * self.laser.a_0 / self.laser.w_0**2
-        message += "To match the bubble radius to the beam waist, n_p <= {:06.2f} 10^18 cm^(-3).\n".format(nlim)
+        message += "To match the bubble radius to the beam waist, n_p <= {:.3f} 10^18 cm^(-3).\n".format(nlim)
+        message += "The recommended transverse resolution is either r_0 = {:.3f} mu or 0.116/k_p = {:.3f} mu.\n".format(self.laser.r_0, self.plasma.dr)
+        message += "The recommended longitudinal resolution is dz = {:.3f} mu.\n".format(self.laser.dz)
         return message
 
 
@@ -112,39 +119,49 @@ if __name__ == "__main__":
     # Lu parameters
     # laser = Laser(w_0=19.5, lambda_0=0.8, tau_0=30, P=200)
     # plasma = Plasma(n_p=1.5)
+    # m = Matching(laser, plasma)
 
     # CETAL parameters
-    # laser = Laser(w_0=30, lambda_0=0.8, tau_0=40, epsilon=7)
-    # plasma = Plasma(n_p=0.294)
+    laser = Laser(w_0=30, lambda_0=0.8, tau_0=40, epsilon=7)
+    plasma = Plasma(n_p=0.294)
+    m = Matching(laser, plasma)
+
+
 
     # CALDER-CIRC_2008.pdf
-    laser = Laser(w_0=18, lambda_0=0.8, tau_0=30, P=17.303)
-    plasma = Plasma(n_p=7.5)
+    #laser = Laser(w_0=18, lambda_0=0.8, tau_0=30, P=17.303)
+    #plasma = Plasma(n_p=7.5)
+    #m = Matching(laser, plasma)
     
     # FBPIC lwfa_script.py
     # laser = Laser(w_0=5, lambda_0=0.8, tau_0=16.67, P=13.27)
     # plasma = Plasma(n_p=4)
+    # m = Matching(laser, plasma)
 
 
     print("Laser parameters:")
-    print('Rayleigh length z_R = {:04.2f} mm.'.format(laser.z_R*1e-3))
-    print('Peak intensity in the focal plane: I_0 = {:03.3f} 10^20 W/cm^2'.format(laser.I_0))
-    print('a_0 = {:04.2f}'.format(laser.a_0))
-    print('Electric field E_L = {:04.2f} TV/m.'.format(laser.E))
+    print('Wavenumber k_0 = {:.3f} rads/micron.'.format(laser.k_0))
+    print('Angular frequency omega_0 = {:.3f} rads/fs.'.format(laser.omega_0))
+    print('Power P = {:.3f} TW.'.format(laser.P))
+
+    print('Rayleigh length z_R = {:.3f} mm.'.format(laser.z_R*1e-3))
+    print('Peak intensity in the focal plane: I_0 = {:.3f} 10^20 W/cm^2'.format(laser.I_0))
+    print('a_0 = {:.3f}'.format(laser.a_0))
+    print('Electric field E_L = {:.3f} TV/m.'.format(laser.E))
+    print('Critical plasma density is n_c = {:.3f} x 10^18 cm^(-3).'.format(m.n_c))
     print()
 
 
     
     print('Plasma parameters:')
-    print('Plasma skin depth lambda_p = {:04.2f} micron'.format(plasma.lambda_p))
-    print('Plasma wave number k_p = {:04.2f} rad/micron'.format(plasma.k_p))
-    print('Plasma frequency omega_p = {:04.3f} rad/fs'.format(plasma.omega_p))
+    print('Plasma skin depth lambda_p = {:.3f} micron'.format(plasma.lambda_p))
+    print('Plasma wave number k_p = {:.3f} rad/micron'.format(plasma.k_p))
+    print('Plasma frequency omega_p = {:.3f} rad/fs'.format(plasma.omega_p))
     print()
 
-    m = Matching(laser, plasma)
     print('Matching conditions:')
-    print('Dephasing length L_d = {:08.1f} mm.'.format(m.L_d*1e-3))
-    print('Pump depletion length L_pd = {:08.1f} mm.'.format(m.L_pd*1e-3))
-    print('Critical power for relativistic self-focusing P_c = {:04.2f} TW.'.format(m.P_c))
+    print('Dephasing length L_d = {:.3f} mm.'.format(m.L_d*1e-3))
+    print('Pump depletion length L_pd = {:.3f} mm.'.format(m.L_pd*1e-3))
+    print('Critical power for relativistic self-focusing P_c = {:.3f} TW.'.format(m.P_c))
     print()
     print(m.conditions())
