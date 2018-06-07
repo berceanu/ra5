@@ -4,25 +4,68 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from matplotlib.gridspec import GridSpec
+
+def idx_from_val(arr1d, val):
+    """Given a 1D array `arr1d`, find index of closest value to `val`."""
+    idx = (np.abs(arr1d - val)).argmin()
+    return idx
 
 class Plot2D:
     'Pseudocolor plot of a 2D array with optional 1D slices attached.'
 
-    def __init__(self, arr2d, h_axis, v_axis, xlabel=r'', ylabel=r'', zlabel=r''):
+    def __init__(self, arr2d, h_axis, v_axis, xlabel=r'', ylabel=r'', zlabel=r'',
+                **kwargs):
         r"""
         >>> uu = np.linspace(0, np.pi, 128)
         >>> data = np.cos(uu - 0.5) * np.cos(uu.reshape(-1, 1) - 1.0)
-        >>> p2d = Plot2D(data, uu, uu, xlabel=r'$x$ ($\mu$m)',
-                ylabel=r'$y$ ($\mu$m)', zlabel=r'$\rho$ (cm$^{-3}$)')
+        >>> p2d = Plot2D(data, uu, uu,
+                    xlabel=r'$x$ ($\mu$m)', ylabel=r'$y$ ($\mu$m)', zlabel=r'$\rho$ (cm$^{-3}$)',
+                    hslice_val=0, vslice_val=-35,
+                    hslice_opts={'color': 'red', 'lw' : 0.5},
+                    vslice_opts={'color': 'blue', 'ls': '-'},
+                    figsize=(6, 6), cmap='hot', cbar=True,
+                    extent=(-60, -20, -50, 50))
         """
-        self.data = arr2d
-        self.h_axis = h_axis
-        self.v_axis = v_axis
+        self.extent = kwargs.get('extent', (np.min(h_axis), np.max(h_axis),
+                                            np.min(v_axis), np.max(v_axis)))
+                                            #
+        xmin, xmax, ymin, ymax = self.extent
+        xmin_idx, xmax_idx = idx_from_val(h_axis, xmin), idx_from_val(h_axis, xmax)
+        ymin_idx, ymax_idx = idx_from_val(v_axis, ymin), idx_from_val(v_axis, ymax)
+        #
+        self.data = arr2d[ymin_idx:ymax_idx, xmin_idx:xmax_idx]
+        self.min_data, self.max_data = np.amin(self.data), np.amax(self.data)
+        self.vmin, self.vmax = kwargs.get('vmin', self.min_data), kwargs.get('vmax', self.max_data)
+        #
+        self.h_axis = h_axis[xmin_idx:xmax_idx]
+        self.v_axis = v_axis[ymin_idx:ymax_idx]
+        #
         self.label = {'x':xlabel, 'y':ylabel, 'z':zlabel}
-        self.extent = [np.min(h_axis), np.max(h_axis),
-                       np.min(v_axis), np.max(v_axis)]
-        self.param = {'figsize':(6.4, 6.4), 'cmap':'coolwarm'}
+        #
+        self.cbar = kwargs.get('cbar', False)
+        #
+        self.hslice_val = kwargs.get('hslice_val')
+        self.vslice_val = kwargs.get('vslice_val')
+        self.hslice_idx = None
+        self.vslice_idx = None
+        if self.hslice_val is not None:
+            self.hslice_idx = idx_from_val(self.v_axis, self.hslice_val)
+        if self.vslice_val is not None:
+            self.vslice_idx = idx_from_val(self.h_axis, self.vslice_val)
+            #
+        #
+        self.text = kwargs.get('text', '')
+        #
+        self.fig = plt.figure(figsize=kwargs.get('figsize', (6.4, 6.4)))
+        self.draw_fig(**kwargs)
+    
+    def __str__(self):
+        return 'extent=({:.3f}, {:.3f}, {:.3f}, {:.3f}); min, max = ({:.3f}, {:.3f})'.format(
+            np.min(self.h_axis), np.max(self.h_axis),
+            np.min(self.v_axis), np.max(self.v_axis),
+            self.min_data, self.max_data)
 
 
     @staticmethod
@@ -40,109 +83,141 @@ class Plot2D:
         return fig.colorbar(mappable, cax=cax)
 
 
-    def cbar(self, ax=None, **kwargs):
-        r"""
-        >>> p2d.cbar(figsize=(4.8, 4.8), cmap='hot')
-        """
-        if not ax:
-            self.param.update(kwargs)
-            fig, ax = plt.subplots(figsize=self.param['figsize'])
-
-        im = ax.imshow(self.data, origin='lower',
+    def main_panel(self, **kwargs):
+        self.im = self.ax0.imshow(self.data, origin='lower',
                              extent = self.extent,
                              aspect='auto',
                              interpolation='none',
-                             cmap=self.param['cmap'])
-    
-        ax.set_xlabel(self.label['x'])
-        ax.set_ylabel(self.label['y'])
-    
-        if not ax:
-            cbar = self.colorbar(im)
-            cbar.set_label(self.label['z'])    
+                             cmap=kwargs.get('cmap', 'viridis'),
+                             vmin=self.vmin,
+                             vmax=self.vmax
+                             )
+                             #
+        self.ax0.set_xlabel(self.label['x'])
+        self.ax0.set_ylabel(self.label['y'])
+        #
+        self.ax0.text(0.02, 0.95, self.text, transform=self.ax0.transAxes, color='red')           
 
 
+    def draw_fig(self, **kwargs):
+        slice_opts = {'ls': '--', 'color': 'red', 'lw' : 1} # defaults
+        hslice_opts = slice_opts.copy()
+        vslice_opts = slice_opts.copy()
+        #
+        hslice_opts.update(kwargs.get('hslice_opts', {}))
+        vslice_opts.update(kwargs.get('vslice_opts', {}))
 
-    def slice(self, hslice_pos=None, vslice_pos=None, **kwargs):
-        r"""
-        >>> p2d.slice(figsize=(6.4, 6.4), hslice_pos=100, vslice_pos=10,
-                         vslice_opts={'ls':'--', 'color':'green'},
-                         hslice_opts={'ls':'-', 'color':'red'})
-        """
-        slice_opts = {'ls': '--', 'color': '0.25'}
-        hslice_opts = kwargs.get('hslice_opts', slice_opts)
-        vslice_opts = kwargs.get('vslice_opts', slice_opts)
+         # #
+        if (self.hslice_idx is None) and (self.vslice_idx is None):
+            gs = GridSpec(1, 1, height_ratios=[1], width_ratios=[1])
+            self.ax0 = self.fig.add_subplot(gs[0])
+            self.main_panel(**kwargs)
+        
+        # ---- #
+        elif (self.hslice_idx is not None) and (self.vslice_idx is None):
+            gs = GridSpec(2, 1, height_ratios=[1, 3], width_ratios=[1])
+            self.ax0 = self.fig.add_subplot(gs[1, 0])
+            self.axh = self.fig.add_subplot(gs[0, 0], sharex=self.ax0)
+            #
+            self.main_panel(**kwargs)            
+            #
+            self.ax0.axhline(y=self.v_axis[self.hslice_idx], **hslice_opts)
+            #
+            self.ax0.annotate('{:.1f}'.format(self.v_axis[self.hslice_idx]),\
+             xy=(self.h_axis[3], self.v_axis[self.hslice_idx+3]),\
+              xycoords='data', color=hslice_opts['color'])
+            #
+            self.axh.set_xmargin(0)
+            self.axh.set_ylabel(self.label['z'])
+            self.axh.plot(self.h_axis, self.data[self.hslice_idx, :], **hslice_opts)
+            self.axh.set_ylim(self.vmin, self.vmax)            
+            #
+            self.axh.xaxis.set_visible(False) 
+            #
+            for sp in ('top', 'bottom', 'right'):
+                self.axh.spines[sp].set_visible(False)
+            #
+            self.fig.subplots_adjust(hspace=0.03)
+        
+        # | #
+        elif (self.vslice_idx is not None) and (self.hslice_idx is None):
+            gs = GridSpec(1, 2, height_ratios=[1], width_ratios=[3, 1])
+            self.ax0 = self.fig.add_subplot(gs[0, 0])
+            self.axv = self.fig.add_subplot(gs[0, 1], sharey=self.ax0)
+            #
+            self.main_panel(**kwargs)            
+            #
+            self.ax0.axvline(x=self.h_axis[self.vslice_idx], **vslice_opts)
+            #
+            self.ax0.annotate('{:.1f}'.format(self.h_axis[self.vslice_idx]),\
+             xy=(self.h_axis[self.vslice_idx - 40], self.v_axis[40]),\
+              xycoords='data', color=vslice_opts['color'], rotation='vertical')
+            #
+            self.axv.set_ymargin(0)
+            self.axv.set_xlabel(self.label['z'])
+            self.axv.plot(self.data[:, self.vslice_idx], self.v_axis, **vslice_opts)
+            self.axv.set_xlim(self.vmin, self.vmax)            
+            #
+            self.axv.yaxis.set_visible(False)
+            #
+            for sp in ('top', 'left', 'right'):
+                self.axv.spines[sp].set_visible(False)
+            #
+            self.fig.subplots_adjust(wspace=0.03)
+       
+        # --|-- #
+        else: 
+            gs = GridSpec(2, 2, height_ratios=[1, 3], width_ratios=[3, 1])
+            self.ax0 = self.fig.add_subplot(gs[1, 0])
+            self.axh = self.fig.add_subplot(gs[0, 0], sharex=self.ax0)
+            self.axv = self.fig.add_subplot(gs[1, 1], sharey=self.ax0)
+            #
+            self.main_panel(**kwargs)
+            #
+            self.ax0.axhline(y=self.v_axis[self.hslice_idx], **hslice_opts)  ##----##
+            self.ax0.axvline(x=self.h_axis[self.vslice_idx], **vslice_opts)  ## | ##
+            # --- #
+            self.ax0.annotate('{:.1f}'.format(self.v_axis[self.hslice_idx]),\
+             xy=(self.h_axis[3], self.v_axis[self.hslice_idx + 3]),\
+              xycoords='data', color=hslice_opts['color'])
+            # | #
+            self.ax0.annotate('{:.1f}'.format(self.h_axis[self.vslice_idx]),\
+             xy=(self.h_axis[self.vslice_idx - 40], self.v_axis[40]),\
+              xycoords='data', color=vslice_opts['color'], rotation='vertical')
+            # --- #
+            self.axh.set_xmargin(0)  # otherwise ax0 may have white margins
+            self.axh.set_ylabel(self.label['z'])
+            self.axh.plot(self.h_axis, self.data[self.hslice_idx, :], **hslice_opts)
+            self.axh.set_ylim(self.vmin, self.vmax)
+            #self.axh.set_yticks([-1, 0, 1])
+            # | #
+            self.axv.set_ymargin(0)
+            self.axv.set_xlabel(self.label['z'])
+            self.axv.plot(self.data[:, self.vslice_idx], self.v_axis, **vslice_opts)
+            self.axv.set_xlim(self.vmin, self.vmax)
+            # hide the relevant axis
+            self.axh.xaxis.set_visible(False) #-
+            self.axv.yaxis.set_visible(False) #|
+            # "Despine" the slice profiles
+            for ax, spines in ((self.axh, ('top', 'bottom', 'right')),
+                               (self.axv, ('top', 'left', 'right'))):
+                #
+                for sp in spines:
+                    ax.spines[sp].set_visible(False)
+            #
+            self.fig.subplots_adjust(wspace=0.03, hspace=0.03)
 
-        if not hslice_pos:
-            hslice_pos = self.data.shape[0] // 2 
-        if not vslice_pos:
-            vslice_pos = self.data.shape[1] // 2 
-        if not vslice_opts:
-            vslice_opts = slice_opts
+        self.fig.tight_layout()
 
-        # A lot of information about GridSpec can be found here:
-        # https://matplotlib.org/tutorials/intermediate/gridspec.html
-        
-        # Figure with three axes of different width and height. Axis-sharing
-        # is used to make easier interactive exploration but could perfectly
-        # be removed if not needed.
-    
-        # set up a GridSpec grid and add the desired Axes one by one
-        self.param.update(kwargs)
+        if self.cbar:
+            cax = inset_axes(self.ax0, width="30%", height="5%", loc=3) 
+            cbar = plt.colorbar(self.im, cax=cax, ticks=[self.vmin, self.vmax], orientation='horizontal')
+            cbar.set_label(self.label['z'], color='red')  
+            cbar.ax.xaxis.set_ticks_position('top')
+            cbar.ax.xaxis.set_label_position('top')  
+            cbxtick_obj = plt.getp(cbar.ax.axes, 'xticklabels')
+            plt.setp(cbxtick_obj, color='red')
 
-        fig = plt.figure(figsize=self.param['figsize'])
-        gs = GridSpec(2, 2, height_ratios=[1, 3], width_ratios=[3, 1])
-        ax0 = fig.add_subplot(gs[1, 0])
-        axh = fig.add_subplot(gs[0, 0], sharex=ax0)
-        axv = fig.add_subplot(gs[1, 1], sharey=ax0)
-        
-        # Imshow global view. Some documentation about imshow:
-        # https://matplotlib.org/gallery/images_contours_and_fields/image_demo.html
-        self.cbar(ax0)
-        
-        # Just to show where the slices are done. Another example in Matplotlib
-        # gallery about the relevant functions:
-        # https://matplotlib.org/gallery/subplots_axes_and_figures/axhspan_demo.html
-        ax0.axhline(y=self.v_axis[hslice_pos], **hslice_opts)  ##----##
-        ax0.axvline(x=self.h_axis[vslice_pos], **vslice_opts)  ## | ##
-        # One can also annotate the slice markers. More information
-        # about `ax.annotate` here:
-        # https://matplotlib.org/tutorials/text/annotations.html
-        ax0.annotate('{:07.3f}'.format(self.v_axis[hslice_pos]), xy=(self.h_axis[3], self.v_axis[hslice_pos+3]), xycoords='data', color=hslice_opts['color'])
-        ax0.annotate('{:07.3f}'.format(self.h_axis[vslice_pos]), xy=(self.h_axis[vslice_pos-5], self.v_axis[self.v_axis.shape[0]//2 - 5]), xycoords='data', color=vslice_opts['color'], rotation='vertical')
-        
-        # Horizontal Slice Profile
-        axh.set_xmargin(0)  # otherwise ax0 may have white margins
-        axh.set_ylabel(self.label['z'])
-        axh.plot(self.h_axis, self.data[hslice_pos, :], **hslice_opts)
-        #axh.set_ylim(-1, 1)
-        #axh.set_yticks([-1, 0, 1])
-        # NB: More examples of fancy customisation of ticks and formatters here:
-        # https://matplotlib.org/gallery/ticks_and_spines/tick-locators.html
-        # https://matplotlib.org/gallery/ticks_and_spines/tick-formatters.html
-        
-        # Vertical Slice Profile
-        axv.set_ymargin(0)  # otherwise ax0 may have white margins
-        axv.set_xlabel(self.label['z'])
-        axv.plot(self.data[:, vslice_pos], self.v_axis, **vslice_opts)
-        #axv.set_xlim(-1, 1)
-        #axv.set_xticks([-1, 0, 1])
-        
-        # "Despine" the slice profiles and hide the relevant axis
-        for ax, spines in ((axh, ('top', 'bottom', 'right')),
-                           (axv, ('top', 'left', 'right'))):
-            for sp in spines:
-                ax.spines[sp].set_visible(False)
-        axh.xaxis.set_visible(False)
-        axv.yaxis.set_visible(False)
-        
-        # Tweak a bit the figure layout
-        fig.tight_layout()
-        fig.subplots_adjust(wspace=0.03, hspace=0.03)
-    
-        #return fig
-        
-    
 
 
 def plot1d_break_x(fig, h_axis, v_axis, param, slice_opts):
