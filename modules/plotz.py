@@ -24,7 +24,7 @@ class Plot2D:
                     xlabel=r'$x$ ($\mu$m)', ylabel=r'$y$ ($\mu$m)', zlabel=r'$\rho$ (cm$^{-3}$)',
                     hslice_val=0,
                     vslice_val=840.5,
-                    hslice_opts={'color': 'red', 'lw' : 0.5, 'ls':'-'},
+                    hslice_opts={'color': 'firebrick', 'lw' : 0.5, 'ls':'-'},
                     vslice_opts={'color': 'blue', 'ls': '-'},
                     figsize=(8, 8), cmap='viridis', cbar=True,
                     extent=(822, 865, -20, 20),
@@ -110,7 +110,7 @@ class Plot2D:
 
 
     def draw_fig(self, **kwargs):
-        slice_opts = {'ls': '--', 'color': 'red', 'lw' : 1} # defaults
+        slice_opts = {'ls': '--', 'color': 'firebrick', 'lw' : 1} # defaults
         hslice_opts = slice_opts.copy()
         vslice_opts = slice_opts.copy()
         #
@@ -219,17 +219,18 @@ class Plot2D:
 
         self.fig.tight_layout()
         #
-        self.ax0.text(0.02, 0.95, self.text, transform=self.ax0.transAxes, color='red')           
+        self.ax0.text(0.02, 0.95, self.text, transform=self.ax0.transAxes, color='firebrick')           
         #
         if self.cbar:
             cax = inset_axes(self.ax0, width="90%", height="3%", loc=3) 
             cbar = plt.colorbar(self.im, cax=cax, orientation='horizontal') # ticks=[self.vmin, self.vmax]
-            # cbar.set_label(self.label['z'], color='red') 
-            self.ax0.text(0.93, 0.03, self.label['z'], transform=self.ax0.transAxes, color='red')           
+            # cbar.set_label(self.label['z'], color='firebrick') 
+            self.ax0.text(0.93, 0.03, self.label['z'], transform=self.ax0.transAxes, color='firebrick')           
             cbar.ax.xaxis.set_ticks_position('top')
             cbar.ax.xaxis.set_label_position('top')  
+            cbar.ax.tick_params(color='firebrick', width=3)
             cbxtick_obj = plt.getp(cbar.ax.axes, 'xticklabels')
-            plt.setp(cbxtick_obj, color='red')
+            plt.setp(cbxtick_obj, color='firebrick')
 
 
 
