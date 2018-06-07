@@ -22,11 +22,19 @@ class Plot2D:
         >>> data = np.cos(uu - 0.5) * np.cos(uu.reshape(-1, 1) - 1.0)
         >>> p2d = Plot2D(data, uu, uu,
                     xlabel=r'$x$ ($\mu$m)', ylabel=r'$y$ ($\mu$m)', zlabel=r'$\rho$ (cm$^{-3}$)',
-                    hslice_val=0, vslice_val=-35,
-                    hslice_opts={'color': 'red', 'lw' : 0.5},
+                    hslice_val=0,
+                    vslice_val=840.5,
+                    hslice_opts={'color': 'red', 'lw' : 0.5, 'ls':'-'},
                     vslice_opts={'color': 'blue', 'ls': '-'},
-                    figsize=(6, 6), cmap='hot', cbar=True,
-                    extent=(-60, -20, -50, 50))
+                    figsize=(8, 8), cmap='viridis', cbar=True,
+                    extent=(822, 865, -20, 20),
+                    vmin=-0.1, vmax=10,
+                    text='iteration = {}'.format(35100),
+                    norm=colors.SymLogNorm(linthresh=1e-4)
+                    )
+        Other options for norm:
+        >>> import matplotlib.colors as colors
+        >>> norm = colors.LogNorm()
         """
         self.extent = kwargs.get('extent', (np.min(h_axis), np.max(h_axis),
                                             np.min(v_axis), np.max(v_axis)))
@@ -41,10 +49,13 @@ class Plot2D:
         #
         self.h_axis = h_axis[xmin_idx:xmax_idx]
         self.v_axis = v_axis[ymin_idx:ymax_idx]
+        np.clip(self.data, self.vmin, self.vmax, self.data)
         #
         self.label = {'x':xlabel, 'y':ylabel, 'z':zlabel}
         #
         self.cbar = kwargs.get('cbar', False)
+        # see https://matplotlib.org/users/colormapnorms.html
+        self.norm = kwargs.get('norm')
         #
         self.hslice_val = kwargs.get('hslice_val')
         self.vslice_val = kwargs.get('vslice_val')
@@ -65,7 +76,7 @@ class Plot2D:
         return 'extent=({:.3f}, {:.3f}, {:.3f}, {:.3f}); min, max = ({:.3f}, {:.3f})'.format(
             np.min(self.h_axis), np.max(self.h_axis),
             np.min(self.v_axis), np.max(self.v_axis),
-            self.min_data, self.max_data)
+            np.amin(self.data), np.amax(self.data))
 
 
     @staticmethod
@@ -87,6 +98,7 @@ class Plot2D:
         self.im = self.ax0.imshow(self.data, origin='lower',
                              extent = self.extent,
                              aspect='auto',
+                             norm=self.norm,
                              interpolation='none',
                              cmap=kwargs.get('cmap', 'viridis'),
                              vmin=self.vmin,
@@ -95,8 +107,6 @@ class Plot2D:
                              #
         self.ax0.set_xlabel(self.label['x'])
         self.ax0.set_ylabel(self.label['y'])
-        #
-        self.ax0.text(0.02, 0.95, self.text, transform=self.ax0.transAxes, color='red')           
 
 
     def draw_fig(self, **kwargs):
@@ -150,7 +160,7 @@ class Plot2D:
             self.ax0.axvline(x=self.h_axis[self.vslice_idx], **vslice_opts)
             #
             self.ax0.annotate('{:.1f}'.format(self.h_axis[self.vslice_idx]),\
-             xy=(self.h_axis[self.vslice_idx - 40], self.v_axis[40]),\
+             xy=(self.h_axis[self.vslice_idx - 40], self.v_axis[-40]),\
               xycoords='data', color=vslice_opts['color'], rotation='vertical')
             #
             self.axv.set_ymargin(0)
@@ -182,7 +192,7 @@ class Plot2D:
               xycoords='data', color=hslice_opts['color'])
             # | #
             self.ax0.annotate('{:.1f}'.format(self.h_axis[self.vslice_idx]),\
-             xy=(self.h_axis[self.vslice_idx - 40], self.v_axis[40]),\
+             xy=(self.h_axis[self.vslice_idx - 40], self.v_axis[-40]),\
               xycoords='data', color=vslice_opts['color'], rotation='vertical')
             # --- #
             self.axh.set_xmargin(0)  # otherwise ax0 may have white margins
@@ -208,11 +218,14 @@ class Plot2D:
             self.fig.subplots_adjust(wspace=0.03, hspace=0.03)
 
         self.fig.tight_layout()
-
+        #
+        self.ax0.text(0.02, 0.95, self.text, transform=self.ax0.transAxes, color='red')           
+        #
         if self.cbar:
-            cax = inset_axes(self.ax0, width="30%", height="5%", loc=3) 
-            cbar = plt.colorbar(self.im, cax=cax, ticks=[self.vmin, self.vmax], orientation='horizontal')
-            cbar.set_label(self.label['z'], color='red')  
+            cax = inset_axes(self.ax0, width="90%", height="3%", loc=3) 
+            cbar = plt.colorbar(self.im, cax=cax, orientation='horizontal') # ticks=[self.vmin, self.vmax]
+            # cbar.set_label(self.label['z'], color='red') 
+            self.ax0.text(0.93, 0.03, self.label['z'], transform=self.ax0.transAxes, color='red')           
             cbar.ax.xaxis.set_ticks_position('top')
             cbar.ax.xaxis.set_label_position('top')  
             cbxtick_obj = plt.getp(cbar.ax.axes, 'xticklabels')
