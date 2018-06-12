@@ -3,6 +3,10 @@
 import numpy as np
 
 import matplotlib.pyplot as plt
+
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from matplotlib.gridspec import GridSpec
@@ -69,7 +73,12 @@ class Plot2D:
         #
         self.text = kwargs.get('text', '')
         #
-        self.fig = plt.figure(figsize=kwargs.get('figsize', (6.4, 6.4)))
+        self.fig = Figure(figsize=kwargs.get('figsize', (6.4, 6.4)))
+        # A canvas must be manually attached to the figure (pyplot would automatically
+        # do it).  This is done by instantiating the canvas with the figure as
+        # argument.
+        FigureCanvas(self.fig)
+        #        
         self.draw_fig(**kwargs)
     
     def __str__(self):
@@ -223,7 +232,7 @@ class Plot2D:
         #
         if self.cbar:
             cax = inset_axes(self.ax0, width="90%", height="3%", loc=3) 
-            cbar = plt.colorbar(self.im, cax=cax, orientation='horizontal') # ticks=[self.vmin, self.vmax]
+            cbar = self.fig.colorbar(self.im, cax=cax, orientation='horizontal') # ticks=[self.vmin, self.vmax]
             # cbar.set_label(self.label['z'], color='firebrick') 
             self.ax0.text(0.93, 0.03, self.label['z'], transform=self.ax0.transAxes, color='firebrick')           
             cbar.ax.xaxis.set_ticks_position('top')
