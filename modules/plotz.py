@@ -260,7 +260,7 @@ class Plot1D:
 
         self.ax.plot(self.h_axis, self.data, **kwargs)
 
-        self.ax.set(xlim=self.xlim, ylim=self.ylim,
+        self.ax.set(xlim=[self.h_axis[0], self.h_axis[-1]], ylim=self.ylim,
             ylabel=self.label['y'], xlabel=self.label['x'])
 
         self.ax.grid()
