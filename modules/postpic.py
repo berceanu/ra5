@@ -6,6 +6,16 @@ m_e = physical_constants['electron mass'][0] # electon mass in Kg
 import numpy as np
 from scipy.signal import hilbert
 
+from multiprocessing import cpu_count
+
+default_nprocs = cpu_count()
+
+def distribute(nitems,  nprocs=None):
+    if nprocs is None:
+        nprocs = default_nprocs
+    nitems_per_proc = (nitems + nprocs -1) // nprocs
+    return [(i, min(nitems, i+nitems_per_proc))
+            for i in range(0, nitems, nitems_per_proc)]
 
 def E0(lambda0=0.8e-6):
     k0 = 2 * np.pi / 0.8e-6
@@ -15,15 +25,15 @@ def E0(lambda0=0.8e-6):
 
 def get_a0(ts, t=None, iteration=None, pol='x', m='all', lambda0=0.8e-6):
     
-    if pol not in ['x', 'y']:
-        raise ValueError('The `pol` argument is missing or erroneous.')
+    # if pol not in ['x', 'y']:
+    #     raise ValueError('The `pol` argument is missing or erroneous.')
 
-    if pol == 'x':
-        slicing_dir = 'y'
-        theta = 0
-    else:
-        slicing_dir = 'x'
-        theta = np.pi / 2.
+    # if pol == 'x':
+    slicing_dir = 'y'
+    theta = 0
+    # else:
+    #     slicing_dir = 'x'
+    #     theta = np.pi / 2.
 
     # get E_x field in V/m
     Ex, info_Ex = ts.get_field(field='E', coord=pol,
@@ -140,5 +150,6 @@ def get_laser_diags(ts, t=None, iteration=None, pol='x', m='all',
         z0_u, omega0_u, w0_u, ctau_u = 'mu', 'rad/fs', 'mu', 'mu'
         
     if prnt and units=='mufs':
-        print('z0 = {:.2f} {}, omega0 = {:.2f} {}, a0 = {:.2f}, w0 = {:.2f} {}, ctau = {:.2f} {}.'.format(z0, z0_u, omega0, omega0_u, a0, w0, w0_u, ctau, ctau_u))
+        print('z0 = {:.2f} {}, omega0 = {:.2f} {}, a0 = {:.2f}, w0 = {:.2f} {}, ctau = {:.2f} {}.'\
+        .format(z0, z0_u, omega0, omega0_u, a0, w0, w0_u, ctau, ctau_u))
     return z0, omega0, a0, w0, ctau

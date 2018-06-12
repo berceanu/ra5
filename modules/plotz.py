@@ -2,10 +2,13 @@
 
 import numpy as np
 
-import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from matplotlib.gridspec import GridSpec
+from matplotlib.artist import setp, getp
 
 def idx_from_val(arr1d, val):
     """Given a 1D array `arr1d`, find index of closest value to `val`."""
@@ -49,7 +52,7 @@ class Plot2D:
         #
         self.h_axis = h_axis[xmin_idx:xmax_idx]
         self.v_axis = v_axis[ymin_idx:ymax_idx]
-        np.clip(self.data, self.vmin, self.vmax, self.data)
+        # np.clip(self.data, self.vmin, self.vmax, self.data)
         #
         self.label = {'x':xlabel, 'y':ylabel, 'z':zlabel}
         #
@@ -69,7 +72,12 @@ class Plot2D:
         #
         self.text = kwargs.get('text', '')
         #
-        self.fig = plt.figure(figsize=kwargs.get('figsize', (6.4, 6.4)))
+        self.fig = Figure(figsize=kwargs.pop('figsize', (8, 8)))
+        # A canvas must be manually attached to the figure (pyplot would automatically
+        # do it).  This is done by instantiating the canvas with the figure as
+        # argument.
+        self.canvas = FigureCanvas(self.fig)
+        #        
         self.draw_fig(**kwargs)
     
     def __str__(self):
@@ -110,7 +118,7 @@ class Plot2D:
 
 
     def draw_fig(self, **kwargs):
-        slice_opts = {'ls': '--', 'color': 'firebrick', 'lw' : 1} # defaults
+        slice_opts = {'ls': '-', 'color': 'firebrick', 'lw' : 0.5} # defaults
         hslice_opts = slice_opts.copy()
         vslice_opts = slice_opts.copy()
         #
@@ -223,15 +231,44 @@ class Plot2D:
         #
         if self.cbar:
             cax = inset_axes(self.ax0, width="90%", height="3%", loc=3) 
-            cbar = plt.colorbar(self.im, cax=cax, orientation='horizontal') # ticks=[self.vmin, self.vmax]
+            cbar = self.fig.colorbar(self.im, cax=cax, orientation='horizontal') # ticks=[self.vmin, self.vmax]
             # cbar.set_label(self.label['z'], color='firebrick') 
             self.ax0.text(0.93, 0.03, self.label['z'], transform=self.ax0.transAxes, color='firebrick')           
             cbar.ax.xaxis.set_ticks_position('top')
             cbar.ax.xaxis.set_label_position('top')  
             cbar.ax.tick_params(color='firebrick', width=1.5)
-            cbxtick_obj = plt.getp(cbar.ax.axes, 'xticklabels')
-            plt.setp(cbxtick_obj, color='firebrick')
+            cbxtick_obj = getp(cbar.ax.axes, 'xticklabels')
+            setp(cbxtick_obj, color='firebrick')
 
+
+class Plot1D:
+    def __init__(self, arr1d, h_axis, xlabel=r'', ylabel=r'',
+                **kwargs):
+        self.xlim = kwargs.pop('xlim', [np.min(h_axis), np.max(h_axis)])
+        self.ylim = kwargs.pop('ylim', [np.min(arr1d), np.max(arr1d)])
+        #
+        xmin_idx, xmax_idx = idx_from_val(h_axis, self.xlim[0]), idx_from_val(h_axis, self.xlim[1])
+        #
+        self.h_axis = h_axis[xmin_idx:xmax_idx]
+        self.data = arr1d[xmin_idx:xmax_idx]
+        #
+        self.label = {'x':xlabel, 'y':ylabel}
+        #
+        self.fig = Figure(figsize=kwargs.pop('figsize', (6.4, 6.4)))
+        self.canvas = FigureCanvas(self.fig)
+        self.ax = self.fig.add_subplot(111)
+
+        self.ax.plot(self.h_axis, self.data, **kwargs)
+
+        self.ax.set(xlim=[self.h_axis[0], self.h_axis[-1]], ylim=self.ylim,
+            ylabel=self.label['y'], xlabel=self.label['x'])
+
+        self.ax.grid()
+    
+    def __str__(self):
+        return 'extent=({:.3f}, {:.3f}); min, max = ({:.3f}, {:.3f})'.format(
+            np.min(self.h_axis), np.max(self.h_axis),
+            np.amin(self.data), np.amax(self.data))
 
 
 def plot1d_break_x(fig, h_axis, v_axis, param, slice_opts):
