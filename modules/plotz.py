@@ -72,7 +72,7 @@ class Plot2D:
         #
         self.text = kwargs.get('text', '')
         #
-        self.fig = Figure(figsize=kwargs.pop('figsize', (6.4, 6.4)))
+        self.fig = Figure(figsize=kwargs.pop('figsize', (8, 8)))
         # A canvas must be manually attached to the figure (pyplot would automatically
         # do it).  This is done by instantiating the canvas with the figure as
         # argument.
@@ -118,7 +118,7 @@ class Plot2D:
 
 
     def draw_fig(self, **kwargs):
-        slice_opts = {'ls': '--', 'color': 'firebrick', 'lw' : 1} # defaults
+        slice_opts = {'ls': '-', 'color': 'firebrick', 'lw' : 0.5} # defaults
         hslice_opts = slice_opts.copy()
         vslice_opts = slice_opts.copy()
         #
