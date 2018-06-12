@@ -52,7 +52,7 @@ class Plot2D:
         #
         self.h_axis = h_axis[xmin_idx:xmax_idx]
         self.v_axis = v_axis[ymin_idx:ymax_idx]
-        np.clip(self.data, self.vmin, self.vmax, self.data)
+        # np.clip(self.data, self.vmin, self.vmax, self.data)
         #
         self.label = {'x':xlabel, 'y':ylabel, 'z':zlabel}
         #
@@ -72,7 +72,7 @@ class Plot2D:
         #
         self.text = kwargs.get('text', '')
         #
-        self.fig = Figure(figsize=kwargs.get('figsize', (6.4, 6.4)))
+        self.fig = Figure(figsize=kwargs.pop('figsize', (6.4, 6.4)))
         # A canvas must be manually attached to the figure (pyplot would automatically
         # do it).  This is done by instantiating the canvas with the figure as
         # argument.
@@ -240,6 +240,35 @@ class Plot2D:
             cbxtick_obj = getp(cbar.ax.axes, 'xticklabels')
             setp(cbxtick_obj, color='firebrick')
 
+
+class Plot1D:
+    def __init__(self, arr1d, h_axis, xlabel=r'', ylabel=r'',
+                **kwargs):
+        self.xlim = kwargs.pop('xlim', [np.min(h_axis), np.max(h_axis)])
+        self.ylim = kwargs.pop('ylim', [np.min(arr1d), np.max(arr1d)])
+        #
+        xmin_idx, xmax_idx = idx_from_val(h_axis, self.xlim[0]), idx_from_val(h_axis, self.xlim[1])
+        #
+        self.h_axis = h_axis[xmin_idx:xmax_idx]
+        self.data = arr1d[xmin_idx:xmax_idx]
+        #
+        self.label = {'x':xlabel, 'y':ylabel}
+        #
+        self.fig = Figure(figsize=kwargs.pop('figsize', (6.4, 6.4)))
+        self.canvas = FigureCanvas(self.fig)
+        self.ax = self.fig.add_subplot(111)
+
+        self.ax.plot(self.h_axis, self.data, **kwargs)
+
+        self.ax.set(xlim=self.xlim, ylim=self.ylim,
+            ylabel=self.label['y'], xlabel=self.label['x'])
+
+        self.ax.grid()
+    
+    def __str__(self):
+        return 'extent=({:.3f}, {:.3f}); min, max = ({:.3f}, {:.3f})'.format(
+            np.min(self.h_axis), np.max(self.h_axis),
+            np.amin(self.data), np.amax(self.data))
 
 
 def plot1d_break_x(fig, h_axis, v_axis, param, slice_opts):
