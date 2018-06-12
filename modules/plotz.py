@@ -76,7 +76,7 @@ class Plot2D:
         # A canvas must be manually attached to the figure (pyplot would automatically
         # do it).  This is done by instantiating the canvas with the figure as
         # argument.
-        FigureCanvas(self.fig)
+        self.canvas = FigureCanvas(self.fig)
         #        
         self.draw_fig(**kwargs)
     
