@@ -217,7 +217,7 @@ class Plot2D:
             #
             self.fig.subplots_adjust(wspace=0.03, hspace=0.03)
 
-        self.fig.tight_layout()
+        # self.fig.tight_layout()
         #
         self.ax0.text(0.02, 0.95, self.text, transform=self.ax0.transAxes, color='firebrick')           
         #
