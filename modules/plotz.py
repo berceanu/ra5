@@ -2,14 +2,13 @@
 
 import numpy as np
 
-import matplotlib.pyplot as plt
-
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from matplotlib.gridspec import GridSpec
+from matplotlib.artist import setp, getp
 
 def idx_from_val(arr1d, val):
     """Given a 1D array `arr1d`, find index of closest value to `val`."""
@@ -238,8 +237,8 @@ class Plot2D:
             cbar.ax.xaxis.set_ticks_position('top')
             cbar.ax.xaxis.set_label_position('top')  
             cbar.ax.tick_params(color='firebrick', width=1.5)
-            cbxtick_obj = plt.getp(cbar.ax.axes, 'xticklabels')
-            plt.setp(cbxtick_obj, color='firebrick')
+            cbxtick_obj = getp(cbar.ax.axes, 'xticklabels')
+            setp(cbxtick_obj, color='firebrick')
 
 
 
