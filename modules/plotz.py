@@ -56,7 +56,7 @@ class Plot2D:
         #
         self.label = {'x':xlabel, 'y':ylabel, 'z':zlabel}
         #
-        self.cbar = kwargs.get('cbar', False)
+        self.cbar = kwargs.get('cbar', True)
         # see https://matplotlib.org/users/colormapnorms.html
         self.norm = kwargs.get('norm')
         #
