@@ -253,6 +253,7 @@ class Plot1D:
         self.data = arr1d[xmin_idx:xmax_idx]
         #
         self.label = {'x':xlabel, 'y':ylabel}
+        self.text = kwargs.pop('text', '')
         #
         self.fig = Figure(figsize=kwargs.pop('figsize', (6.4, 6.4)))
         self.canvas = FigureCanvas(self.fig)
@@ -264,6 +265,9 @@ class Plot1D:
             ylabel=self.label['y'], xlabel=self.label['x'])
 
         self.ax.grid()
+
+        self.ax.text(0.02, 0.95, self.text, transform=self.ax.transAxes, color='firebrick')           
+
     
     def __str__(self):
         return 'extent=({:.3f}, {:.3f}); min, max = ({:.3f}, {:.3f})'.format(
