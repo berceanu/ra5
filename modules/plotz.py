@@ -233,7 +233,7 @@ class Plot2D:
             cax = inset_axes(self.ax0, width="70%", height="3%", loc=2) 
             cbar = self.fig.colorbar(self.im, cax=cax, orientation='horizontal') # ticks=[self.vmin, self.vmax]
             # cbar.set_label(self.label['z'], color='firebrick') 
-            self.ax0.text(0.85, 0.93, self.label['z'], transform=self.ax0.transAxes, color='firebrick')           
+            self.ax0.text(0.75, 0.98, self.label['z'], transform=self.ax0.transAxes, color='firebrick')           
             cbar.ax.xaxis.set_ticks_position('top')
             cbar.ax.xaxis.set_label_position('top')  
             cbar.ax.tick_params(color='firebrick', width=1.5)
