@@ -236,7 +236,7 @@ class Plot2D:
             self.ax0.text(0.74, 0.97, self.label['z'], transform=self.ax0.transAxes, color='firebrick')           
             # cbar.ax.xaxis.set_ticks_position('top')
             # cbar.ax.xaxis.set_label_position('top')  
-            cbar.ax.tick_params(color='firebrick', width=1.5, labelsize=10)
+            cbar.ax.tick_params(color='firebrick', width=1.5, labelsize=8)
             cbxtick_obj = getp(cbar.ax.axes, 'xticklabels')
             setp(cbxtick_obj, color='firebrick')
 
