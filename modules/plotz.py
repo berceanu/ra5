@@ -227,7 +227,7 @@ class Plot2D:
 
         # self.fig.tight_layout()
         #
-        self.ax0.text(0.02, 0.95, self.text, transform=self.ax0.transAxes, color='firebrick')           
+        self.ax0.text(0.02, 0.02, self.text, transform=self.ax0.transAxes, color='firebrick')           
         #
         if self.cbar:
             cax = inset_axes(self.ax0, width="70%", height="3%", loc=2) 
