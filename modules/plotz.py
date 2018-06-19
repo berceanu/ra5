@@ -234,8 +234,8 @@ class Plot2D:
             cbar = self.fig.colorbar(self.im, cax=cax, orientation='horizontal') # ticks=[self.vmin, self.vmax]
             # cbar.set_label(self.label['z'], color='firebrick') 
             self.ax0.text(0.74, 0.97, self.label['z'], transform=self.ax0.transAxes, color='firebrick')           
-            cbar.ax.xaxis.set_ticks_position('top')
-            cbar.ax.xaxis.set_label_position('top')  
+            # cbar.ax.xaxis.set_ticks_position('top')
+            # cbar.ax.xaxis.set_label_position('top')  
             cbar.ax.tick_params(color='firebrick', width=1.5)
             cbxtick_obj = getp(cbar.ax.axes, 'xticklabels')
             setp(cbxtick_obj, color='firebrick')
