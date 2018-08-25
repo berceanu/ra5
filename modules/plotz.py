@@ -242,8 +242,16 @@ class Plot2D:
 
 
 class Plot1D:
+    'Plot of 1D array.'
+
     def __init__(self, arr1d, h_axis, xlabel=r'', ylabel=r'',
                 **kwargs):
+        r"""
+        >>> plot = plotz.Plot1D(a0, z0, xlabel=r'$%s \;(\mu m)$'%'z', ylabel=r'$%s$'%'a_0',
+                                xlim=[0, 900], ylim=[0, 10],
+                                figsize=(10, 6), color='red')
+        >>> plot.canvas.print_figure('a0.png')
+        """
         self.xlim = kwargs.pop('xlim', [np.min(h_axis), np.max(h_axis)])
         self.ylim = kwargs.pop('ylim', [np.min(arr1d), np.max(arr1d)])
         #
