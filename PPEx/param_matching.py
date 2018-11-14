@@ -66,7 +66,7 @@ class Plasma(object):
     def __init__(self, n_p):
         """Create plasma with given density.
         
-        n_e -- plasma density in units of 10^18 cm^(-3)
+        n_p -- plasma density in units of 10^18 cm^(-3)
         """
         self.n_p = n_p
         self.lambda_p = 33.39 / sqrt(self.n_p) # skin depth in microns
@@ -113,6 +113,9 @@ class Matching(object):
         message += "The recommended longitudinal resolution is dz = {:.3f} mu.\n".format(self.laser.dz)
         return message
 
+def FWHM_to_w0(FWHM):
+    return 0.5 * sqrt(2 / log(2)) * FWHM
+
 
 
 if __name__ == "__main__":
@@ -122,8 +125,13 @@ if __name__ == "__main__":
     # m = Matching(laser, plasma)
 
     # CETAL parameters
-    laser = Laser(w_0=30, lambda_0=0.8, tau_0=40, epsilon=7)
-    plasma = Plasma(n_p=0.294)
+    #laser = Laser(w_0=30, lambda_0=0.8, tau_0=40, epsilon=7)
+    #plasma = Plasma(n_p=0.294)
+    #m = Matching(laser, plasma)
+
+    # PRL 120, 254802 (2018)
+    laser = Laser(w_0=FWHM_to_w0(23), lambda_0=0.8, tau_0=30, epsilon=15)
+    plasma = Plasma(n_p=1.75)
     m = Matching(laser, plasma)
 
 
