@@ -66,7 +66,7 @@ class Plasma(object):
     def __init__(self, n_p):
         """Create plasma with given density.
         
-        n_e -- plasma density in units of 10^18 cm^(-3)
+        n_p -- plasma density in units of 10^18 cm^(-3)
         """
         self.n_p = n_p
         self.lambda_p = 33.39 / sqrt(self.n_p) # skin depth in microns
@@ -113,6 +113,9 @@ class Matching(object):
         message += "The recommended longitudinal resolution is dz = {:.3f} mu.\n".format(self.laser.dz)
         return message
 
+def FWHM_to_w0(FWHM):
+    return 0.5 * sqrt(2 / log(2)) * FWHM
+
 
 
 if __name__ == "__main__":
@@ -131,6 +134,16 @@ if __name__ == "__main__":
     plasma = Plasma(n_p=6.125)
     m = Matching(laser, plasma)
 
+    # PRL 120, 254802 (2018)
+    #laser = Laser(w_0=FWHM_to_w0(23), lambda_0=0.8, tau_0=30, epsilon=15)
+    #plasma = Plasma(n_p=1.75)
+    #m = Matching(laser, plasma)
+
+    # GBS Yb:Yag laser
+    laser = Laser(w_0=28, lambda_0=0.515, tau_0=3500, epsilon=0.4)
+    plasma = Plasma(n_p=1.)
+    m = Matching(laser, plasma)
+    
 
 
     # CALDER-CIRC_2008.pdf
@@ -151,7 +164,7 @@ if __name__ == "__main__":
     print(f'Laser energy E = {laser.energy()} J.')
 
     print('Rayleigh length z_R = {:.3f} mm.'.format(laser.z_R*1e-3))
-    print('Peak intensity in the focal plane: I_0 = {:.3f} 10^20 W/cm^2'.format(laser.I_0))
+    print('Peak intensity in the focal plane: I_0 = {:.10} 10^20 W/cm^2'.format(laser.I_0))
     print('a_0 = {:.3f}'.format(laser.a_0))
     print('Electric field E_L = {:.3f} TV/m.'.format(laser.E))
     print('Critical plasma density is n_c = {:.3f} x 10^18 cm^(-3).'.format(m.n_c))
