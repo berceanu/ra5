@@ -122,8 +122,13 @@ if __name__ == "__main__":
     # m = Matching(laser, plasma)
 
     # CETAL parameters
-    laser = Laser(w_0=30, lambda_0=0.8, tau_0=40, epsilon=7)
-    plasma = Plasma(n_p=0.294)
+    # laser = Laser(w_0=30, lambda_0=0.8, tau_0=40, epsilon=7)
+    # plasma = Plasma(n_p=0.294)
+    # m = Matching(laser, plasma)
+
+    # ELI 10 PW parameters
+    laser = Laser(w_0=10, lambda_0=0.8, tau_0=33, P=1570.796)
+    plasma = Plasma(n_p=6.125)
     m = Matching(laser, plasma)
 
 
@@ -143,6 +148,7 @@ if __name__ == "__main__":
     print('Wavenumber k_0 = {:.3f} rads/micron.'.format(laser.k_0))
     print('Angular frequency omega_0 = {:.3f} rads/fs.'.format(laser.omega_0))
     print('Power P = {:.3f} TW.'.format(laser.P))
+    print(f'Laser energy E = {laser.energy()} J.')
 
     print('Rayleigh length z_R = {:.3f} mm.'.format(laser.z_R*1e-3))
     print('Peak intensity in the focal plane: I_0 = {:.3f} 10^20 W/cm^2'.format(laser.I_0))
