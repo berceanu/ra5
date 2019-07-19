@@ -125,15 +125,25 @@ if __name__ == "__main__":
     # m = Matching(laser, plasma)
 
     # CETAL parameters
-    #laser = Laser(w_0=30, lambda_0=0.8, tau_0=40, epsilon=7)
-    #plasma = Plasma(n_p=0.294)
-    #m = Matching(laser, plasma)
+    # laser = Laser(w_0=30, lambda_0=0.8, tau_0=40, epsilon=7)
+    # plasma = Plasma(n_p=0.294)
+    # m = Matching(laser, plasma)
 
-    # PRL 120, 254802 (2018)
-    laser = Laser(w_0=FWHM_to_w0(23), lambda_0=0.8, tau_0=30, epsilon=15)
-    plasma = Plasma(n_p=1.75)
+    # ELI 10 PW parameters
+    laser = Laser(w_0=10, lambda_0=0.8, tau_0=33, P=1570.796)
+    plasma = Plasma(n_p=6.125)
     m = Matching(laser, plasma)
 
+    # PRL 120, 254802 (2018)
+    #laser = Laser(w_0=FWHM_to_w0(23), lambda_0=0.8, tau_0=30, epsilon=15)
+    #plasma = Plasma(n_p=1.75)
+    #m = Matching(laser, plasma)
+
+    # GBS Yb:Yag laser
+    laser = Laser(w_0=28, lambda_0=0.515, tau_0=3500, epsilon=0.4)
+    plasma = Plasma(n_p=1.)
+    m = Matching(laser, plasma)
+    
 
 
     # CALDER-CIRC_2008.pdf
@@ -151,9 +161,10 @@ if __name__ == "__main__":
     print('Wavenumber k_0 = {:.3f} rads/micron.'.format(laser.k_0))
     print('Angular frequency omega_0 = {:.3f} rads/fs.'.format(laser.omega_0))
     print('Power P = {:.3f} TW.'.format(laser.P))
+    print(f'Laser energy E = {laser.energy()} J.')
 
     print('Rayleigh length z_R = {:.3f} mm.'.format(laser.z_R*1e-3))
-    print('Peak intensity in the focal plane: I_0 = {:.3f} 10^20 W/cm^2'.format(laser.I_0))
+    print('Peak intensity in the focal plane: I_0 = {:.10} 10^20 W/cm^2'.format(laser.I_0))
     print('a_0 = {:.3f}'.format(laser.a_0))
     print('Electric field E_L = {:.3f} TV/m.'.format(laser.E))
     print('Critical plasma density is n_c = {:.3f} x 10^18 cm^(-3).'.format(m.n_c))
